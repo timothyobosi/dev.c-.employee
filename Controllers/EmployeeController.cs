@@ -36,13 +36,23 @@ namespace MyAPIs.Controllers
             {
                 return NotFound();
             }
-            return employee;
+            return employee;// Return OK with the employee data
         }
 
         //POST: api/employee
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         {
+            
+            //Validate the employee model
+            if(!ModelState.IsValid){
+                return BadRequest(ModelState);//Return bad request if model state is invalid
+
+            }
+            //Check if EmployeeId is already taken
+            if(_context.Employees.Any(e=> e.EmployeeId == employee.EmployeeId)){
+                return Conflict($"Employee with ID{employee.EmployeeId} already exists.");
+            }
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
@@ -61,7 +71,7 @@ namespace MyAPIs.Controllers
             _context.Entry(employee).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return NoContent();//Return NoCOntext on successful update
         }
 
         //DELETE: api/employee/5
@@ -77,7 +87,7 @@ namespace MyAPIs.Controllers
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return NoContent();//Return NoContext onsuccessful deletion
         }
     }
 }
